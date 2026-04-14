@@ -1,0 +1,41 @@
+# Build outputs
+target/
+build/
+out/
+
+# Local OCR input files (do not version PDFs de teste)
+documento/
+
+# STS/Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+*.launch
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# OS/filesystem noise
+.DS_Store
+Thumbs.db
+.gitattributes
+/.mvn
+mvnw
+mvnw.cmd

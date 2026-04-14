@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Decisoes</title>
+    <link rel="stylesheet" th:href="@{/css/consulta-decisoes.css}">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Consulta de Decisoes Processuais</h1>
+        <p>Etapa inicial: tela de filtros habilitada sem execucao das consultas.</p>
+    </div>
+
+    <div class="card">
+        <form method="get" action="#">
+            <div class="grid">
+                <div class="field span-2">
+                    <label for="materia">Pesquisar por materia</label>
+                    <input id="materia" name="materia" type="text" placeholder="Ex.: diferencial de aliquota, ICMS, construcao civil">
+                </div>
+
+                <div class="field">
+                    <label for="numeroProcesso">Numero do processo</label>
+                    <input id="numeroProcesso" name="numeroProcesso" type="text" placeholder="Ex.: 0226752012-5">
+                </div>
+
+                <div class="field">
+                    <label for="numeroAutoInfracao">Numero do auto de infracao</label>
+                    <input id="numeroAutoInfracao" name="numeroAutoInfracao" type="text" placeholder="Ex.: 93300008.09.00000163/2012-71">
+                </div>
+
+                <div class="field span-2">
+                    <label>Periodo de julgamento</label>
+                    <div class="periodo-grid">
+                        <input id="periodoInicio" name="periodoInicio" type="date" aria-label="Data inicial do periodo de julgamento">
+                        <input id="periodoFim" name="periodoFim" type="date" aria-label="Data final do periodo de julgamento">
+                    </div>
+                </div>
+
+                <div class="field span-2">
+                    <label for="identificacaoAutuado">CPF/CNPJ/IE do autuado</label>
+                    <input id="identificacaoAutuado" name="identificacaoAutuado" type="text" placeholder="Informe CPF, CNPJ ou inscricao estadual">
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" type="submit">Pesquisar</button>
+                <button class="btn btn-secondary" type="reset">Limpar filtros</button>
+            </div>
+
+            <p class="hint">Nesta etapa, a tela e os filtros estao prontos. A consulta sera conectada nas proximas evolucoes.</p>
+        </form>
+    </div>
+</div>
+<script th:src="@{/js/consulta-decisoes.js}"></script>
+</body>
+</html>

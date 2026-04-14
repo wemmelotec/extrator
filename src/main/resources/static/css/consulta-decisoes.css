@@ -1,0 +1,134 @@
+:root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --primary: #163e68;
+    --accent: #2b7a78;
+    --text: #1d2733;
+    --muted: #5f6b7a;
+    --border: #d9e1ec;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(160deg, #e9eef7 0%, #f8fbff 45%, #edf8f7 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 16px;
+}
+
+.container {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    margin: 0;
+    color: var(--primary);
+    font-size: 1.8rem;
+}
+
+.header p {
+    margin: 8px 0 0;
+    color: var(--muted);
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 20px rgba(22, 62, 104, 0.07);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field label {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.field input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: #fff;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43, 122, 120, 0.15);
+}
+
+.span-2 {
+    grid-column: 1 / -1;
+}
+
+.periodo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #e9eff7;
+    color: var(--primary);
+}
+
+.hint {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .periodo-grid {
+        grid-template-columns: 1fr;
+    }
+}

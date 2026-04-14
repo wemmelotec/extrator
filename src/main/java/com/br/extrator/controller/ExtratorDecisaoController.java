@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.br.extrator.service.ExtratorService;
+import com.br.extrator.service.ExtratorDecisaoService;
 
 import net.sourceforge.tess4j.TesseractException;
 
 @RestController
-@RequestMapping("/ler")
-public class ExtratorController {
+@RequestMapping("/extrair/decisao")
+public class ExtratorDecisaoController {
 	
 	@Autowired
-	private ExtratorService extratorService;
+	private ExtratorDecisaoService extratorService;
 	
 	@PostMapping
 	public ResponseEntity<String> extrair(@RequestPart MultipartFile file) throws IOException, TesseractException{

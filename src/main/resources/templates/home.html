@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrator - Home</title>
+    <link rel="stylesheet" th:href="@{/css/app-layout.css}">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-title">Extrator OCR</div>
+        <nav class="nav-links">
+            <a class="nav-link" data-nav="home" th:href="@{/}">Home</a>
+            <a class="nav-link" data-nav="consulta" th:href="@{/consulta/decisoes}">Consulta</a>
+            <a class="nav-link" data-nav="documentos" th:href="@{/documentos}">Upload e Gerenciamento</a>
+        </nav>
+    </aside>
+
+    <div class="content-area">
+        <header class="topbar">
+            <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir ou fechar menu">Menu</button>
+            <div class="topbar-title">Painel de Documentos Processuais</div>
+        </header>
+
+        <main class="page-content">
+            <section class="hero-card">
+                <div class="hero-tag">Bem-vindo</div>
+                <h1>Extrator de texto para decisoes processuais</h1>
+                <p>
+                    Plataforma para upload, processamento OCR e consulta de metadados extraidos de PDFs.
+                    Use o menu lateral para consultar decisoes ou gerenciar documentos no filesystem da aplicacao.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" th:href="@{/documentos}">Ir para Upload e Gerenciamento</a>
+                    <a class="btn btn-secondary" th:href="@{/consulta/decisoes}">Ir para Consulta</a>
+                </div>
+            </section>
+
+            <section class="overview-grid">
+                <article class="overview-card">
+                    <h2>Consulta inteligente</h2>
+                    <p>Filtre por numero de processo, materia, auto de infracao e identificacao do autuado.</p>
+                </article>
+                <article class="overview-card">
+                    <h2>Pipeline hibrido</h2>
+                    <p>Prioriza texto nativo de PDF e aplica OCR quando necessario para manter qualidade.</p>
+                </article>
+                <article class="overview-card">
+                    <h2>Gerenciamento centralizado</h2>
+                    <p>Acompanhe os documentos processados e remova arquivos com acao direta na listagem.</p>
+                </article>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <span>Extrator OCR</span>
+            <span>Spring Boot + Thymeleaf + OCR Pipeline</span>
+        </footer>
+    </div>
+</div>
+<script th:src="@{/js/app-layout.js}"></script>
+</body>
+</html>

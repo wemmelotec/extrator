@@ -24,7 +24,6 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
@@ -77,43 +76,37 @@ public class ExtratorDecisaoService {
     @Value("${ocr.image.scale-factor:2.0}")
     private double scaleFactor;
 
-    /** Objetivo: Orquestrar o fluxo completo de extracao para PDF/imagem e retornar texto final. */
-    public String extrair(MultipartFile file) throws IOException, TesseractException {
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Arquivo nao informado");
-        }
+    /** Objetivo: Extrair texto de arquivo local (caminho em filesystem). Usado no processamento diferido. */
+    public String extrairDeArquivoLocal(String caminhoArquivo) throws IOException, TesseractException {
+        java.nio.file.Path path = java.nio.file.Paths.get(caminhoArquivo);
+        byte[] conteudoArquivo = java.nio.file.Files.readAllBytes(path);
 
         ITesseract tesseract = criarTesseract();
-        String textoBruto = ehPdf(file)
-                ? extrairTextoDePdf(file, tesseract)
-                : extrairTextoDeImagem(file, tesseract);
+        String textoBruto;
 
-        return posProcessarTexto(textoBruto);
-    }
-
-    /** Objetivo: Extrair texto de imagem enviada aplicando pre-processamento antes do OCR. */
-    private String extrairTextoDeImagem(MultipartFile file, ITesseract tesseract)
-            throws IOException, TesseractException {
-
-        Mat imagemOriginal = carregarImagemDoUpload(file);
-        BufferedImage imagemPreProcessada = preProcessarImagemParaOcr(matToBufferedImage(imagemOriginal));
-        return executarOcr(imagemPreProcessada, tesseract);
-    }
-
-    /** Objetivo: Extrair texto de PDF usando texto nativo quando viavel e OCR como fallback. */
-    private String extrairTextoDePdf(MultipartFile file, ITesseract tesseract)
-            throws IOException, TesseractException {
-
-        try (PDDocument documento = Loader.loadPDF(file.getBytes())) {
-            if (usarTextoNativoPdf) {
-                String textoNativo = extrairTextoNativoDoPdf(documento);
-                if (textoNativoTemQualidadeMinima(textoNativo)) {
-                    return textoNativo;
+        if (caminhoArquivo.toLowerCase().endsWith(".pdf")) {
+            try (PDDocument documento = Loader.loadPDF(conteudoArquivo)) {
+                if (usarTextoNativoPdf) {
+                    String textoNativo = extrairTextoNativoDoPdf(documento);
+                    if (textoNativoTemQualidadeMinima(textoNativo)) {
+                        textoBruto = textoNativo;
+                    } else {
+                        textoBruto = extrairTextoPdfViaOcr(documento, tesseract);
+                    }
+                } else {
+                    textoBruto = extrairTextoPdfViaOcr(documento, tesseract);
                 }
             }
-
-            return extrairTextoPdfViaOcr(documento, tesseract);
+        } else {
+            Mat imagemOriginal = imdecode(new Mat(conteudoArquivo), opencv_imgcodecs.IMREAD_COLOR);
+            if (imagemOriginal.empty()) {
+                throw new BadRequestException("Formato de arquivo nao suportado");
+            }
+            BufferedImage imagemPreProcessada = preProcessarImagemParaOcr(matToBufferedImage(imagemOriginal));
+            textoBruto = executarOcr(imagemPreProcessada, tesseract);
         }
+
+        return posProcessarTexto(textoBruto);
     }
 
     /** Objetivo: Ler texto vetorial do PDF sem OCR para preservar acentuacao e qualidade. */
@@ -161,31 +154,20 @@ public class ExtratorDecisaoService {
         return texto.toString();
     }
 
-    /** Objetivo: Decodificar o upload como imagem OpenCV para processamento. */
-    private Mat carregarImagemDoUpload(MultipartFile file) throws IOException, BadRequestException {
-        Mat image = imdecode(new Mat(file.getBytes()), opencv_imgcodecs.IMREAD_COLOR);
-        if (image.empty()) {
-            throw new BadRequestException("Formato de arquivo nao suportado");
-        }
-        return image;
-    }
-
-    /** Objetivo: Detectar se o arquivo enviado deve seguir fluxo de PDF. */
-    private boolean ehPdf(MultipartFile file) {
-        String fileName = file.getOriginalFilename();
-        String contentType = file.getContentType();
-        return (contentType != null && contentType.toLowerCase(Locale.ROOT).contains("pdf"))
-                || (fileName != null && fileName.toLowerCase(Locale.ROOT).endsWith(".pdf"));
-    }
-
     /** Objetivo: Criar instancia do Tesseract com parametros de qualidade para documentos. */
     private ITesseract criarTesseract() {
         Tesseract tesseract = new Tesseract();
+        
         tesseract.setDatapath(tessdataPath);
+        
         tesseract.setLanguage(language);
+        
         tesseract.setPageSegMode(pageSegMode);
+        
         tesseract.setTessVariable("user_defined_dpi", String.valueOf(pdfRenderDpi));
+        
         tesseract.setTessVariable("preserve_interword_spaces", "1");
+        
         return tesseract;
     }
 

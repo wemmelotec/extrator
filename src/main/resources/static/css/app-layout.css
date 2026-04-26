@@ -1,0 +1,226 @@
+:root {
+    --bg-start: #ecf3f9;
+    --bg-end: #f7f2e8;
+    --surface: #ffffff;
+    --surface-alt: #f3f7fb;
+    --border: #cfdae6;
+    --text: #1d2a36;
+    --muted: #5a6a7d;
+    --primary: #114b5f;
+    --primary-strong: #0b3948;
+    --accent: #e07a5f;
+    --sidebar: #0f2f45;
+    --sidebar-muted: #9fb4c6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+}
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: linear-gradient(180deg, #0b283b 0%, var(--sidebar) 70%, #123a50 100%);
+    color: #ffffff;
+    padding: 24px 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transition: transform 0.25s ease;
+    z-index: 20;
+}
+
+.sidebar.collapsed {
+    width: 84px;
+    min-width: 84px;
+    padding: 24px 10px;
+}
+
+.sidebar.collapsed .sidebar-title {
+    display: none;
+}
+
+.sidebar.collapsed .nav-link {
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 0;
+}
+
+.sidebar.collapsed .nav-link::before {
+    font-size: 1.1rem;
+}
+
+.sidebar.collapsed .nav-link[data-nav="home"]::before {
+    content: "⌂";
+}
+
+.sidebar.collapsed .nav-link[data-nav="consulta"]::before {
+    content: "⌕";
+}
+
+.sidebar.collapsed .nav-link[data-nav="documentos"]::before {
+    content: "⚙";
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 24px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-link {
+    color: var(--sidebar-muted);
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #ffffff;
+    border-color: #326183;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topbar {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(6px);
+    position: sticky;
+    top: 0;
+    z-index: 15;
+}
+
+.menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--primary-strong);
+    font-weight: 700;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+
+.topbar-title {
+    font-weight: 700;
+    color: var(--primary-strong);
+}
+
+.page-content {
+    padding: 22px;
+    flex: 1;
+}
+
+.footer {
+    border-top: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.78);
+    padding: 11px 20px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.9rem;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: var(--primary-strong);
+}
+
+.btn-secondary {
+    background: var(--surface-alt);
+    color: var(--primary-strong);
+    border: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        transform: translateX(-100%);
+        width: 260px;
+        min-width: 260px;
+        padding: 24px 18px;
+    }
+
+    .sidebar.collapsed {
+        width: 260px;
+        min-width: 260px;
+        padding: 24px 18px;
+    }
+
+    .sidebar.collapsed .sidebar-title {
+        display: block;
+    }
+
+    .sidebar.collapsed .nav-link {
+        text-align: left;
+        font-size: 1rem;
+        padding: 10px 12px;
+    }
+
+    .sidebar.collapsed .nav-link::before {
+        content: none;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .page-content {
+        padding: 16px;
+    }
+}

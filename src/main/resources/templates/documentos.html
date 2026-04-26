@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extrator - Consulta de Decisoes</title>
+    <title>Extrator - Upload e Gerenciamento</title>
     <link rel="stylesheet" th:href="@{/css/app-layout.css}">
-    <link rel="stylesheet" th:href="@{/css/consulta-decisoes.css}">
+    <link rel="stylesheet" th:href="@{/css/documentos.css}">
 </head>
 <body>
 <div class="app-shell">
@@ -21,29 +21,24 @@
     <div class="content-area">
         <header class="topbar">
             <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir ou fechar menu">Menu</button>
-            <div class="topbar-title">Consulta de Decisoes Processuais</div>
+            <div class="topbar-title">Upload e Gerenciamento de PDFs</div>
         </header>
 
         <main class="page-content">
-            <div class="page-header">
-                <h1>Consulta de documentos</h1>
-                <p>Pesquise para listar todos os documentos processados.</p>
-            </div>
-
-            <section class="card">
-                <form id="consultaForm" method="get" action="#">
-                    <div class="actions">
-                        <button class="btn btn-primary" type="submit">Pesquisar documentos</button>
-                    </div>
+            <section class="panel">
+                <h1>Novo upload</h1>
+                <p class="subtitle">Envie um PDF para processamento e persistencia de metadados.</p>
+                <form id="uploadForm" class="upload-form">
+                    <input type="file" id="arquivoPdf" name="file" accept="application/pdf" required>
+                    <button type="submit" class="btn btn-primary">Enviar PDF</button>
                 </form>
-
-                <p id="consultaStatus" class="hint"></p>
+                <p id="uploadStatus" class="status-message"></p>
             </section>
 
-            <section class="card resultados-card">
-                <div class="resultados-header">
-                    <h2>Resultados</h2>
-                    <button class="btn btn-secondary" type="button" id="recarregarConsulta">Atualizar</button>
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Documentos no filesystem</h2>
+                    <button id="refreshList" class="btn btn-secondary" type="button">Atualizar lista</button>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -54,12 +49,13 @@
                             <th>Status</th>
                             <th>Processo</th>
                             <th>Materia</th>
-                            <th>Upload</th>
+                            <th>Data upload</th>
+                            <th>Acoes</th>
                         </tr>
                         </thead>
-                        <tbody id="consultaResultadosBody">
+                        <tbody id="documentosBody">
                         <tr>
-                            <td colspan="6" class="empty-row">Clique em pesquisar para carregar os documentos.</td>
+                            <td colspan="7" class="empty-row">Carregando documentos...</td>
                         </tr>
                         </tbody>
                     </table>
@@ -69,11 +65,11 @@
 
         <footer class="footer">
             <span>Extrator OCR</span>
-            <span>Consulta de metadados processuais</span>
+            <span>Gerenciamento de arquivos e metadados</span>
         </footer>
     </div>
 </div>
 <script th:src="@{/js/app-layout.js}"></script>
-<script th:src="@{/js/consulta-decisoes.js}"></script>
+<script th:src="@{/js/documentos.js}"></script>
 </body>
 </html>

@@ -1,0 +1,109 @@
+package com.br.extrator.dto;
+
+import com.br.extrator.model.StatusDocumento;
+import java.time.LocalDateTime;
+
+/**
+ * DTO para retornar informações resumidas de um documento (evita enviar texto inteiro)
+ */
+public class DocumentoListaDTO {
+    
+    private Long id;
+    private String nomeOriginal;
+    private LocalDateTime dataUpload;
+    private LocalDateTime dataProcessamento;
+    private StatusDocumento status;
+    private String numeroProcesso;
+    private String materia;
+    private boolean textoNativo;
+    private int tamanhoTexto;
+
+    public DocumentoListaDTO() {}
+
+    public DocumentoListaDTO(Long id, String nomeOriginal, LocalDateTime dataUpload,
+                            LocalDateTime dataProcessamento, StatusDocumento status,
+                            String numeroProcesso, String materia, boolean textoNativo,
+                            String textoExtraido) {
+        this.id = id;
+        this.nomeOriginal = nomeOriginal;
+        this.dataUpload = dataUpload;
+        this.dataProcessamento = dataProcessamento;
+        this.status = status;
+        this.numeroProcesso = numeroProcesso;
+        this.materia = materia;
+        this.textoNativo = textoNativo;
+        this.tamanhoTexto = textoExtraido != null ? textoExtraido.length() : 0;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNomeOriginal() {
+        return nomeOriginal;
+    }
+
+    public void setNomeOriginal(String nomeOriginal) {
+        this.nomeOriginal = nomeOriginal;
+    }
+
+    public LocalDateTime getDataUpload() {
+        return dataUpload;
+    }
+
+    public void setDataUpload(LocalDateTime dataUpload) {
+        this.dataUpload = dataUpload;
+    }
+
+    public LocalDateTime getDataProcessamento() {
+        return dataProcessamento;
+    }
+
+    public void setDataProcessamento(LocalDateTime dataProcessamento) {
+        this.dataProcessamento = dataProcessamento;
+    }
+
+    public StatusDocumento getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusDocumento status) {
+        this.status = status;
+    }
+
+    public String getNumeroProcesso() {
+        return numeroProcesso;
+    }
+
+    public void setNumeroProcesso(String numeroProcesso) {
+        this.numeroProcesso = numeroProcesso;
+    }
+
+    public String getMateria() {
+        return materia;
+    }
+
+    public void setMateria(String materia) {
+        this.materia = materia;
+    }
+
+    public boolean isTextoNativo() {
+        return textoNativo;
+    }
+
+    public void setTextoNativo(boolean textoNativo) {
+        this.textoNativo = textoNativo;
+    }
+
+    public int getTamanhoTexto() {
+        return tamanhoTexto;
+    }
+
+    public void setTamanhoTexto(int tamanhoTexto) {
+        this.tamanhoTexto = tamanhoTexto;
+    }
+}

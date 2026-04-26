@@ -1,0 +1,133 @@
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+}
+
+.panel h1,
+.panel h2 {
+    margin: 0;
+    color: var(--primary-strong);
+}
+
+.subtitle {
+    margin: 8px 0 14px;
+    color: var(--muted);
+}
+
+.upload-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.upload-form input[type="file"] {
+    border: 1px dashed #9cb3c6;
+    background: #f8fbff;
+    border-radius: 10px;
+    padding: 10px;
+    min-width: 280px;
+}
+
+.status-message {
+    margin: 10px 0 0;
+    min-height: 20px;
+    color: var(--primary-strong);
+    font-weight: 600;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 860px;
+}
+
+th,
+td {
+    padding: 10px;
+    border-bottom: 1px solid #e3ebf3;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    color: var(--primary);
+    font-size: 0.9rem;
+    background: #f5f9fd;
+}
+
+.empty-row {
+    text-align: center;
+    color: var(--muted);
+}
+
+.status-pill {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid #bfcfe0;
+    background: #eef4fa;
+    color: #244c69;
+}
+
+.status-pill.COMPLETED {
+    background: #edf8f1;
+    border-color: #a9d9b8;
+    color: #1f6f3f;
+}
+
+.status-pill.ERROR {
+    background: #fdeeee;
+    border-color: #efb5b5;
+    color: #9e2e2e;
+}
+
+.actions-cell {
+    min-width: 126px;
+}
+
+.delete-button {
+    border: 1px solid #efb5b5;
+    background: #fdeeee;
+    color: #8a2424;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(138, 36, 36, 0.14);
+    white-space: nowrap;
+}
+
+.delete-button:hover {
+    background: #fbdede;
+}
+
+.delete-button:active {
+    transform: translateY(1px);
+}
+
+@media (max-width: 900px) {
+    .upload-form input[type="file"] {
+        min-width: 100%;
+    }
+}

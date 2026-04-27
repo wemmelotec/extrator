@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrator OCR - Login</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<div class="login-shell">
+    <section class="login-card">
+        <h1>Extrator OCR</h1>
+        <p class="subtitle">Acesse para continuar</p>
+
+        <form th:action="@{/login}" method="post" class="login-form">
+            <label for="username">Usuário</label>
+            <input id="username" name="username" type="text" autocomplete="username" required>
+
+            <label for="password">Senha</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+            <button type="submit">Entrar</button>
+        </form>
+
+        <p th:if="${param.error}" class="message error">Usuário ou senha inválidos.</p>
+        <p th:if="${param.logout}" class="message ok">Sessão encerrada com sucesso.</p>
+
+        <div class="hint">
+            <strong>Credenciais iniciais:</strong> admin / admin
+        </div>
+    </section>
+</div>
+</body>
+</html>

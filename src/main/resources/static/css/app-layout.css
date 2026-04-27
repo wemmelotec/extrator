@@ -36,11 +36,14 @@ body {
     background: linear-gradient(180deg, #0b283b 0%, var(--sidebar) 70%, #123a50 100%);
     color: #ffffff;
     padding: 24px 18px;
+    display: flex;
+    flex-direction: column;
     position: sticky;
     top: 0;
     height: 100vh;
     transition: transform 0.25s ease;
     z-index: 20;
+    position: sticky;
 }
 
 .sidebar.collapsed {
@@ -75,6 +78,10 @@ body {
     content: "⚙";
 }
 
+.sidebar.collapsed .nav-link.nav-link-logout::before {
+    content: "⎋";
+}
+
 .sidebar-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -86,6 +93,34 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.sidebar-spacer {
+    flex: 1;
+}
+
+.sidebar-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-footer .nav-link {
+    display: block;
+    width: 100%;
+}
+
+.nav-link-logout {
+    color: #ffd5d5;
+    border-color: rgba(255, 136, 136, 0.35);
+    background: rgba(140, 20, 20, 0.25);
+}
+
+.nav-link-logout:hover,
+.nav-link-logout.active {
+    color: #ffffff;
+    border-color: rgba(255, 168, 168, 0.55);
+    background: rgba(170, 33, 33, 0.4);
 }
 
 .nav-link {
@@ -117,6 +152,7 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
+    justify-content: space-between;
     padding: 0 20px;
     border-bottom: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.78);

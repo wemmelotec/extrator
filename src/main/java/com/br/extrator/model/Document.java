@@ -1,55 +1,64 @@
 package com.br.extrator.model;
 
 import java.time.LocalDateTime;
-import jakarta.persistence.*;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 /**
- * Entidade para representar um documento PDF com metadados associados
+ * Documento persistido no Elasticsearch com metadados pesquisáveis.
  */
-@Entity
-@Table(name = "documento")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "${app.elasticsearch.index-name}")
 public class Document {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false)
+    @Field(type = FieldType.Keyword)
     private String nomeOriginal;
 
-    @Column(nullable = false, unique = true)
+    @Field(type = FieldType.Keyword)
     private String caminhoArquivo;
 
-    @Column(columnDefinition = "TEXT")
+    @Field(type = FieldType.Text)
     private String textoExtraido;
 
-    @Column(nullable = false)
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
     private LocalDateTime dataUpload;
 
-    @Column()
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
     private LocalDateTime dataProcessamento;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Field(type = FieldType.Keyword)
     private StatusDocumento status;
 
-    // Metadados extraídos do documento
-    @Column()
+    @MultiField(mainField = @Field(type = FieldType.Text), otherFields = {
+        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+    })
     private String numeroProcesso;
 
-    @Column()
+    @MultiField(mainField = @Field(type = FieldType.Text), otherFields = {
+        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+    })
     private String materia;
 
-    @Column()
+    @Field(type = FieldType.Boolean)
     private boolean textoNativo;
+
+    @Field(type = FieldType.Keyword)
+    private String origemExtracao;
 
     // ==================== Getters e Setters ====================
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -123,5 +132,13 @@ public class Document {
 
     public void setTextoNativo(boolean textoNativo) {
         this.textoNativo = textoNativo;
+    }
+
+    public String getOrigemExtracao() {
+        return origemExtracao;
+    }
+
+    public void setOrigemExtracao(String origemExtracao) {
+        this.origemExtracao = origemExtracao;
     }
 }

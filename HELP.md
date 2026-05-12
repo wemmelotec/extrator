@@ -49,6 +49,28 @@ Runtime warning during OCR requests:
 
 This is the flag required by JavaCPP/OpenCV/Javacv when the OCR pipeline loads native libraries at request time.
 
+### Elasticsearch como armazenamento principal
+
+The application now stores documents in Elasticsearch and uses the same index as the search engine.
+
+Local prerequisites:
+
+* Run Elasticsearch on `http://localhost:9200`
+* Keep the cluster reachable before starting the application if you want the index to be created on startup
+* The application no longer depends on H2/JPA for document persistence
+
+Local Docker setup:
+
+1. Start Elasticsearch: `docker compose up -d`
+2. Check health on the 9200 port: `curl http://localhost:9200`
+3. Stop it later with: `docker compose down`
+
+If you prefer PowerShell, the health check can be:
+
+```powershell
+Invoke-WebRequest http://localhost:9200 | Select-Object -ExpandProperty Content
+```
+
 ### Maven Parent overrides
 
 Due to Maven's design, elements are inherited from the parent POM to the project POM.

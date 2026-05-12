@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  */
 public class DocumentoListaDTO {
     
-    private Long id;
+    private String id;
     private String nomeOriginal;
     private LocalDateTime dataUpload;
     private LocalDateTime dataProcessamento;
@@ -16,13 +16,15 @@ public class DocumentoListaDTO {
     private String numeroProcesso;
     private String materia;
     private boolean textoNativo;
+    private String origemExtracao;
     private int tamanhoTexto;
 
     public DocumentoListaDTO() {}
 
-    public DocumentoListaDTO(Long id, String nomeOriginal, LocalDateTime dataUpload,
+    public DocumentoListaDTO(String id, String nomeOriginal, LocalDateTime dataUpload,
                             LocalDateTime dataProcessamento, StatusDocumento status,
                             String numeroProcesso, String materia, boolean textoNativo,
+                            String origemExtracao,
                             String textoExtraido) {
         this.id = id;
         this.nomeOriginal = nomeOriginal;
@@ -32,14 +34,15 @@ public class DocumentoListaDTO {
         this.numeroProcesso = numeroProcesso;
         this.materia = materia;
         this.textoNativo = textoNativo;
+        this.origemExtracao = origemExtracao;
         this.tamanhoTexto = textoExtraido != null ? textoExtraido.length() : 0;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -97,6 +100,14 @@ public class DocumentoListaDTO {
 
     public void setTextoNativo(boolean textoNativo) {
         this.textoNativo = textoNativo;
+    }
+
+    public String getOrigemExtracao() {
+        return origemExtracao;
+    }
+
+    public void setOrigemExtracao(String origemExtracao) {
+        this.origemExtracao = origemExtracao;
     }
 
     public int getTamanhoTexto() {

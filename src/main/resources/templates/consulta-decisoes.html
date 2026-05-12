@@ -36,8 +36,41 @@
 
             <section class="card">
                 <form id="consultaForm" method="get" action="#">
+                    <div class="form-grid">
+                        <label>
+                            <span>Texto livre</span>
+                            <input type="text" name="termo" placeholder="Nome, texto extraído, processo ou matéria">
+                        </label>
+                        <label>
+                            <span>Status</span>
+                            <select name="status">
+                                <option value="">Todos</option>
+                                <option value="UPLOADING">Uploading</option>
+                                <option value="PROCESSING">Processing</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="ERROR">Error</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>Número do processo</span>
+                            <input type="text" name="numeroProcesso" placeholder="Ex: 0001234-56.2024.8.26.0000">
+                        </label>
+                        <label>
+                            <span>Matéria</span>
+                            <input type="text" name="materia" placeholder="Ex: ICMS / multa / recolhimento">
+                        </label>
+                        <label>
+                            <span>Data inicial</span>
+                            <input type="date" name="dataInicio">
+                        </label>
+                        <label>
+                            <span>Data final</span>
+                            <input type="date" name="dataFim">
+                        </label>
+                    </div>
                     <div class="actions">
                         <button class="btn btn-primary" type="submit">Pesquisar documentos</button>
+                        <button class="btn btn-secondary" type="button" id="limparConsulta">Limpar</button>
                     </div>
                 </form>
 
@@ -58,12 +91,14 @@
                             <th>Status</th>
                             <th>Processo</th>
                             <th>Materia</th>
+                            <th>Origem</th>
                             <th>Upload</th>
+                            <th>Ações</th>
                         </tr>
                         </thead>
                         <tbody id="consultaResultadosBody">
                         <tr>
-                            <td colspan="6" class="empty-row">Clique em pesquisar para carregar os documentos.</td>
+                            <td colspan="8" class="empty-row">Clique em pesquisar para carregar os documentos.</td>
                         </tr>
                         </tbody>
                     </table>

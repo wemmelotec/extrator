@@ -32,6 +32,29 @@ import net.sourceforge.tess4j.TesseractException;
 @Service
 public class ExtratorDecisaoService {
 
+    public enum OrigemExtracao {
+        PDFBOX,
+        TESSERACT
+    }
+
+    public static final class ResultadoExtracao {
+        private final String texto;
+        private final OrigemExtracao origem;
+
+        public ResultadoExtracao(String texto, OrigemExtracao origem) {
+            this.texto = texto;
+            this.origem = origem;
+        }
+
+        public String getTexto() {
+            return texto;
+        }
+
+        public OrigemExtracao getOrigem() {
+            return origem;
+        }
+    }
+
     private static final Pattern CONTROLE_OCR = Pattern.compile("[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\uFFFE\\uFFFF]");
     private static final Pattern ESPACOS_REPETIDOS = Pattern.compile("[ \\t]{2,}");
     private static final Pattern LINHAS_VAZIAS_EXCESSO = Pattern.compile("\\n{3,}");
@@ -77,12 +100,13 @@ public class ExtratorDecisaoService {
     private double scaleFactor;
 
     /** Objetivo: Extrair texto de arquivo local (caminho em filesystem). Usado no processamento diferido. */
-    public String extrairDeArquivoLocal(String caminhoArquivo) throws IOException, TesseractException {
+    public ResultadoExtracao extrairDeArquivoLocal(String caminhoArquivo) throws IOException, TesseractException {
         java.nio.file.Path path = java.nio.file.Paths.get(caminhoArquivo);
         byte[] conteudoArquivo = java.nio.file.Files.readAllBytes(path);
 
         ITesseract tesseract = criarTesseract();
         String textoBruto;
+        OrigemExtracao origem;
 
         if (caminhoArquivo.toLowerCase().endsWith(".pdf")) {
             try (PDDocument documento = Loader.loadPDF(conteudoArquivo)) {
@@ -90,11 +114,14 @@ public class ExtratorDecisaoService {
                     String textoNativo = extrairTextoNativoDoPdf(documento);
                     if (textoNativoTemQualidadeMinima(textoNativo)) {
                         textoBruto = textoNativo;
+                        origem = OrigemExtracao.PDFBOX;
                     } else {
                         textoBruto = extrairTextoPdfViaOcr(documento, tesseract);
+                        origem = OrigemExtracao.TESSERACT;
                     }
                 } else {
                     textoBruto = extrairTextoPdfViaOcr(documento, tesseract);
+                    origem = OrigemExtracao.TESSERACT;
                 }
             }
         } else {
@@ -104,9 +131,10 @@ public class ExtratorDecisaoService {
             }
             BufferedImage imagemPreProcessada = preProcessarImagemParaOcr(matToBufferedImage(imagemOriginal));
             textoBruto = executarOcr(imagemPreProcessada, tesseract);
+            origem = OrigemExtracao.TESSERACT;
         }
 
-        return posProcessarTexto(textoBruto);
+        return new ResultadoExtracao(posProcessarTexto(textoBruto), origem);
     }
 
     /** Objetivo: Ler texto vetorial do PDF sem OCR para preservar acentuacao e qualidade. */

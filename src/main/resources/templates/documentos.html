@@ -6,6 +6,8 @@
     <title>Extrator - Upload e Gerenciamento</title>
     <link rel="stylesheet" th:href="@{/css/app-layout.css}">
     <link rel="stylesheet" th:href="@{/css/documentos.css}">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 <body>
 <div class="app-shell">
@@ -41,7 +43,7 @@
 
             <section class="panel">
                 <div class="panel-header">
-                    <h2>Documentos no filesystem</h2>
+                    <h2>Documentos no Elasticsearch</h2>
                     <button id="refreshList" class="btn btn-secondary" type="button">Atualizar lista</button>
                 </div>
                 <div class="table-wrap">

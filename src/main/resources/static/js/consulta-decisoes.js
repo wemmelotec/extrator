@@ -3,6 +3,7 @@
     var status = null;
     var resultadosBody = null;
     var recarregarBtn = null;
+    var limparBtn = null;
     var ultimaUrlConsulta = null;
 
     function formatDate(value) {
@@ -27,7 +28,7 @@
         resultadosBody.innerHTML = "";
 
         if (!documentos || documentos.length === 0) {
-            resultadosBody.innerHTML = '<tr><td colspan="6" class="empty-row">Nenhum documento encontrado.</td></tr>';
+            resultadosBody.innerHTML = '<tr><td colspan="8" class="empty-row">Nenhum documento encontrado.</td></tr>';
             return;
         }
 
@@ -41,10 +42,38 @@
                 "<td><span class=\"status-pill " + statusClass + "\">" + (doc.status || "-") + "</span></td>" +
                 "<td>" + (doc.numeroProcesso || "-") + "</td>" +
                 "<td>" + (doc.materia || "-") + "</td>" +
+                "<td>" + (doc.origemExtracao || (doc.textoNativo ? "PDFBOX" : "TESSERACT") || "-") + "</td>" +
                 "<td>" + formatDate(doc.dataUpload) + "</td>";
+
+            var actionsTd = document.createElement("td");
+            actionsTd.className = "actions-cell";
+
+            var downloadLink = document.createElement("a");
+            downloadLink.className = "btn btn-secondary btn-sm";
+            downloadLink.textContent = "Baixar PDF";
+            downloadLink.href = "/api/documentos/" + doc.id + "/download";
+            downloadLink.target = "_blank";
+            downloadLink.rel = "noopener";
+
+            actionsTd.appendChild(downloadLink);
+            tr.appendChild(actionsTd);
 
             resultadosBody.appendChild(tr);
         });
+    }
+
+    function buildQueryString(formData) {
+        var params = new URLSearchParams();
+
+        ["termo", "status", "numeroProcesso", "materia", "dataInicio", "dataFim"].forEach(function (field) {
+            var value = formData.get(field);
+            if (value) {
+                params.append(field, value);
+            }
+        });
+
+        var query = params.toString();
+        return query ? "/api/documentos/busca?" + query : "/api/documentos";
     }
 
     function executarConsulta(url) {
@@ -65,14 +94,16 @@
                 setStatus("Consulta realizada com sucesso.", false);
             })
             .catch(function (error) {
-                resultadosBody.innerHTML = '<tr><td colspan="6" class="empty-row">' + error.message + "</td></tr>";
+                resultadosBody.innerHTML = '<tr><td colspan="8" class="empty-row">' + error.message + "</td></tr>";
                 setStatus(error.message, true);
             });
     }
 
     function onSubmit(event) {
         event.preventDefault();
-        executarConsulta("/api/documentos");
+
+        var formData = new FormData(form);
+        executarConsulta(buildQueryString(formData));
     }
 
     function onRecarregar() {
@@ -84,18 +115,27 @@
         executarConsulta("/api/documentos");
     }
 
+    function onLimpar() {
+        form.reset();
+        ultimaUrlConsulta = null;
+        resultadosBody.innerHTML = '<tr><td colspan="8" class="empty-row">Clique em pesquisar para carregar os documentos.</td></tr>';
+        setStatus("Filtros limpos.", false);
+    }
+
     function bootstrap() {
         form = document.getElementById("consultaForm");
         status = document.getElementById("consultaStatus");
         resultadosBody = document.getElementById("consultaResultadosBody");
         recarregarBtn = document.getElementById("recarregarConsulta");
+        limparBtn = document.getElementById("limparConsulta");
 
-        if (!form || !status || !resultadosBody || !recarregarBtn) {
+        if (!form || !status || !resultadosBody || !recarregarBtn || !limparBtn) {
             return;
         }
 
         form.addEventListener("submit", onSubmit);
         recarregarBtn.addEventListener("click", onRecarregar);
+        limparBtn.addEventListener("click", onLimpar);
     }
 
     document.addEventListener("DOMContentLoaded", bootstrap);

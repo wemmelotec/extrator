@@ -3,7 +3,7 @@ package com.br.extrator.service;
 import com.br.extrator.config.DocumentStorageConfig;
 import com.br.extrator.model.Document;
 import com.br.extrator.model.StatusDocumento;
-import com.br.extrator.repository.DocumentRepository;
+import com.br.extrator.service.search.DocumentSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,13 +30,13 @@ public class DocumentService {
     );
 
     @Autowired
-    private DocumentRepository documentRepository;
-
-    @Autowired
     private DocumentStorageConfig storageConfig;
 
     @Autowired
     private ExtratorDecisaoService extratorDecisaoService;
+
+    @Autowired(required = false)
+    private DocumentSearchService documentSearchService;
 
     /**
      * Processa upload de arquivo: salva em disco e cria registro no banco
@@ -64,14 +65,15 @@ public class DocumentService {
 
         // Criar registro de documento
         Document documento = new Document();
+        documento.setId(UUID.randomUUID().toString());
         documento.setNomeOriginal(file.getOriginalFilename());
         documento.setCaminhoArquivo(caminhoRelativo);
         documento.setDataUpload(LocalDateTime.now());
         documento.setStatus(StatusDocumento.UPLOADING);
         documento.setTextoExtraido("");
 
-        // Salvar documento no banco antes de processar OCR
-        documento = documentRepository.save(documento);
+        // Salvar documento no Elasticsearch antes de processar OCR
+        salvarOuAtualizar(documento);
 
         // Processar OCR de forma assíncrona (por enquanto síncrono)
         processarOCR(documento, caminhoAbsoluto);
@@ -85,44 +87,51 @@ public class DocumentService {
     private void processarOCR(Document documento, Path caminhoArquivo) {
         try {
             documento.setStatus(StatusDocumento.PROCESSING);
-            documentRepository.save(documento);
+            salvarOuAtualizar(documento);
 
             // Chamar serviço de extração
-            String textoExtraido = extratorDecisaoService.extrairDeArquivoLocal(caminhoArquivo.toString());
+            ExtratorDecisaoService.ResultadoExtracao resultadoExtracao =
+                    extratorDecisaoService.extrairDeArquivoLocal(caminhoArquivo.toString());
 
-            documento.setTextoExtraido(textoExtraido);
-            preencherMetadados(documento, textoExtraido);
+            documento.setTextoExtraido(resultadoExtracao.getTexto());
+            documento.setOrigemExtracao(resultadoExtracao.getOrigem().name());
+            documento.setTextoNativo(resultadoExtracao.getOrigem() == ExtratorDecisaoService.OrigemExtracao.PDFBOX);
+            preencherMetadados(documento, resultadoExtracao.getTexto());
             documento.setDataProcessamento(LocalDateTime.now());
             documento.setStatus(StatusDocumento.COMPLETED);
-            documento.setTextoNativo(false);
 
         } catch (Exception e) {
             documento.setStatus(StatusDocumento.ERROR);
             documento.setTextoExtraido("Erro no processamento: " + e.getMessage());
+            documento.setOrigemExtracao(null);
         }
 
-        documentRepository.save(documento);
+        salvarOuAtualizar(documento);
     }
 
     /**
      * Busca todos os documentos
      */
     public List<Document> listarTodos() {
-        return documentRepository.findAll();
+        return buscarDocumentos(null, null, null, null, null, null);
     }
 
     /**
      * Busca documento por ID
      */
-    public Optional<Document> buscarPorId(Long id) {
-        return documentRepository.findById(id);
+    public Optional<Document> buscarPorId(String id) {
+        if (documentSearchService != null) {
+            return documentSearchService.buscarPorId(id);
+        }
+
+        return Optional.empty();
     }
 
     /**
      * Deleta um documento (arquivo e registro)
      */
-    public boolean deletarDocumento(Long id) {
-        Optional<Document> documento = documentRepository.findById(id);
+    public boolean deletarDocumento(String id) {
+        Optional<Document> documento = buscarPorId(id);
         if (documento.isPresent()) {
             try {
                 Path caminhoArquivo = Paths.get(documento.get().getCaminhoArquivo()).toAbsolutePath();
@@ -133,10 +142,35 @@ public class DocumentService {
                 // Log erro mas continua com exclusão do registro
                 System.err.println("Erro ao deletar arquivo: " + e.getMessage());
             }
-            documentRepository.deleteById(id);
+            removerDocumento(id);
             return true;
         }
         return false;
+    }
+
+    public List<Document> buscarDocumentos(String termo,
+                                           String status,
+                                           String numeroProcesso,
+                                           String materia,
+                                           LocalDateTime dataInicio,
+                                           LocalDateTime dataFim) {
+        if (documentSearchService != null) {
+            return documentSearchService.buscar(termo, status, numeroProcesso, materia, dataInicio, dataFim);
+        }
+
+        return List.of();
+    }
+
+    private void salvarOuAtualizar(Document documento) {
+        if (documentSearchService != null) {
+            documentSearchService.salvarOuAtualizar(documento);
+        }
+    }
+
+    private void removerDocumento(String id) {
+        if (documentSearchService != null) {
+            documentSearchService.remover(id);
+        }
     }
 
     /**

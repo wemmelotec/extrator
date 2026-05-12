@@ -4,6 +4,8 @@
     var uploadStatus = null;
     var tabelaBody = null;
     var refreshButton = null;
+    var csrfToken = null;
+    var csrfHeader = null;
 
     function formatDate(value) {
         if (!value) {
@@ -69,6 +71,16 @@
         uploadStatus.style.color = isError ? "#972d2d" : "#0b3948";
     }
 
+    function getCsrfHeaders() {
+        if (!csrfToken || !csrfHeader) {
+            return {};
+        }
+
+        var headers = {};
+        headers[csrfHeader] = csrfToken;
+        return headers;
+    }
+
     function loadDocumentos() {
         setStatus("", false);
         fetch("/api/documentos")
@@ -97,7 +109,8 @@
         }
 
         fetch("/api/documentos/" + id, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: getCsrfHeaders()
         })
             .then(function (response) {
                 if (!response.ok) {
@@ -126,7 +139,8 @@
 
         fetch("/api/documentos", {
             method: "POST",
-            body: formData
+            body: formData,
+            headers: getCsrfHeaders()
         })
             .then(function (response) {
                 if (!response.ok) {
@@ -152,6 +166,8 @@
         uploadStatus = document.getElementById("uploadStatus");
         tabelaBody = document.getElementById("documentosBody");
         refreshButton = document.getElementById("refreshList");
+        csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
+        csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
 
         if (!uploadForm || !arquivoInput || !uploadStatus || !tabelaBody || !refreshButton) {
             return;

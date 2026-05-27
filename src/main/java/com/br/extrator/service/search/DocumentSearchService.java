@@ -26,12 +26,29 @@ public class DocumentSearchService {
     private final ElasticsearchClient elasticsearchClient;
     private final String indexName;
 
+    /**
+     * Cria o service de busca com o cliente Elasticsearch e o nome do indice.
+     *
+     * @param elasticsearchClient cliente de alto nivel do Elasticsearch
+     * @param indexName nome do indice configurado para documentos
+     */
     public DocumentSearchService(ElasticsearchClient elasticsearchClient,
                                  @Value("${app.elasticsearch.index-name}") String indexName) {
         this.elasticsearchClient = elasticsearchClient;
         this.indexName = indexName;
     }
 
+    /**
+     * Executa uma busca composta no indice com termo livre e filtros exatos.
+     *
+     * @param termo termo livre para a consulta textual
+     * @param status status do documento a filtrar
+     * @param numeroProcesso numero do processo a filtrar
+     * @param materia materia do documento a filtrar
+     * @param dataInicio data inicial do filtro
+     * @param dataFim data final do filtro
+     * @return lista de documentos encontrados ou lista vazia em caso de erro
+     */
     public List<Document> buscar(String termo,
                                  String status,
                                  String numeroProcesso,
@@ -72,6 +89,11 @@ public class DocumentSearchService {
         }
     }
 
+    /**
+     * Persiste ou atualiza um documento no indice usando o id como chave.
+     *
+     * @param document documento a ser gravado no Elasticsearch
+     */
     public void salvarOuAtualizar(Document document) {
         try {
             elasticsearchClient.index(index -> index
@@ -83,6 +105,12 @@ public class DocumentSearchService {
         }
     }
 
+    /**
+     * Busca um documento pelo identificador unico no indice.
+     *
+     * @param id identificador do documento
+     * @return documento encontrado ou Optional vazio
+     */
     public Optional<Document> buscarPorId(String id) {
         try {
             GetResponse<Document> response = elasticsearchClient.get(get -> get
@@ -95,6 +123,11 @@ public class DocumentSearchService {
         }
     }
 
+    /**
+     * Remove um documento do indice Elasticsearch pelo id.
+     *
+     * @param id identificador do documento a remover
+     */
     public void remover(String id) {
         try {
             elasticsearchClient.delete(delete -> delete.index(indexName).id(id));
@@ -103,6 +136,12 @@ public class DocumentSearchService {
         }
     }
 
+    /**
+     * Adiciona filtro exato de status a consulta bool.
+     *
+     * @param bool builder da consulta bool
+     * @param status status do documento
+     */
     private void adicionarFiltroStatus(co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery.Builder bool,
                                        String status) {
         if (status == null || status.isBlank()) {
@@ -112,6 +151,13 @@ public class DocumentSearchService {
         bool.filter(filter -> filter.term(term -> term.field("status").value(status.toUpperCase())));
     }
 
+    /**
+     * Adiciona filtro exato para um campo de texto.
+     *
+     * @param bool builder da consulta bool
+     * @param field nome do campo no indice
+     * @param value valor desejado para o filtro
+     */
     private void adicionarFiltroTextoExato(co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery.Builder bool,
                                            String field,
                                            String value) {
@@ -122,6 +168,14 @@ public class DocumentSearchService {
         bool.filter(filter -> filter.term(term -> term.field(field).value(value)));
     }
 
+    /**
+     * Aplica o recorte de datas apos a busca no Elasticsearch.
+     *
+     * @param document documento carregado do indice
+     * @param dataInicio data inicial do filtro
+     * @param dataFim data final do filtro
+     * @return true quando o documento esta dentro do intervalo desejado
+     */
     private boolean filtrarData(Document document,
                                 LocalDateTime dataInicio,
                                 LocalDateTime dataFim) {

@@ -13,6 +13,13 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 public class SecurityConfig {
 
+        /**
+         * Define a cadeia de filtros de seguranca com login, logout e regras de acesso.
+         *
+         * @param http objeto de configuracao HTTP do Spring Security
+         * @return cadeia de filtros pronta para ser registrada
+         * @throws Exception quando a configuracao de seguranca falhar
+         */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -40,7 +47,12 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
+        /**
+         * Cria um usuario em memoria para fins de estudo e acesso local.
+         *
+         * @return servico de usuarios com credenciais fixas de administracao
+         */
+        @Bean
     public UserDetailsService userDetailsService() {
         UserDetails admin = User.withUsername("admin")
                 .password("{noop}admin")

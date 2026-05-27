@@ -1,4 +1,7 @@
 (function () {
+    /**
+     * Marca no menu lateral a rota que corresponde a pagina atual.
+     */
     function setActiveMenu() {
         var path = window.location.pathname;
         var key = "home";
@@ -18,6 +21,9 @@
         });
     }
 
+    /**
+     * Registra o comportamento do botao que abre e recolhe a sidebar.
+     */
     function wireSidebarToggle() {
         var toggle = document.getElementById("menuToggle");
         var sidebar = document.getElementById("sidebar");

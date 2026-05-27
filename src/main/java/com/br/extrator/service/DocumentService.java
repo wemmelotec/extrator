@@ -39,7 +39,12 @@ public class DocumentService {
     private DocumentSearchService documentSearchService;
 
     /**
-     * Processa upload de arquivo: salva em disco e cria registro no banco
+     * Processa o upload: valida o arquivo, persiste o binario em disco,
+     * cria o registro inicial no Elasticsearch e dispara a extração de texto.
+     *
+     * @param file arquivo recebido no multipart form-data
+     * @return documento atualizado ao final do fluxo de processamento
+     * @throws IOException quando o arquivo nao pode ser gravado em disco
      */
     public Document processarUpload(MultipartFile file) throws IOException {
     	
@@ -57,10 +62,15 @@ public class DocumentService {
 
         // Salvar arquivo em disco
         try {
+        	
             Files.createDirectories(caminhoAbsoluto.getParent());
+            
             file.transferTo(caminhoAbsoluto.toFile());
+            
         } catch (IOException e) {
+        	
             throw new IOException("Erro ao salvar arquivo: " + e.getMessage(), e);
+            
         }
 
         // Criar registro de documento
@@ -82,7 +92,11 @@ public class DocumentService {
     }
 
     /**
-     * Extrai texto via OCR e atualiza o documento
+     * Extrai texto do arquivo salvo em disco, atualiza os metadados do
+     * documento e persiste o resultado final no Elasticsearch.
+     *
+     * @param documento documento que sera enriquecido com o texto extraido
+     * @param caminhoArquivo caminho absoluto do arquivo salvo em disco
      */
     private void processarOCR(Document documento, Path caminhoArquivo) {
         try {
@@ -110,14 +124,19 @@ public class DocumentService {
     }
 
     /**
-     * Busca todos os documentos
+     * Carrega todos os documentos disponiveis no indice usando a busca padrao.
+     *
+     * @return lista de documentos encontrados
      */
     public List<Document> listarTodos() {
         return buscarDocumentos(null, null, null, null, null, null);
     }
 
     /**
-     * Busca documento por ID
+     * Busca um documento pelo identificador unico.
+     *
+     * @param id identificador do documento no indice
+     * @return documento encontrado ou Optional vazio
      */
     public Optional<Document> buscarPorId(String id) {
         if (documentSearchService != null) {
@@ -128,7 +147,10 @@ public class DocumentService {
     }
 
     /**
-     * Deleta um documento (arquivo e registro)
+     * Remove o arquivo fisico e o documento correspondente do indice.
+     *
+     * @param id identificador do documento a excluir
+     * @return true quando a exclusao foi executada, false quando nao encontrou
      */
     public boolean deletarDocumento(String id) {
         Optional<Document> documento = buscarPorId(id);
@@ -148,6 +170,17 @@ public class DocumentService {
         return false;
     }
 
+    /**
+     * Pesquisa documentos usando os filtros informados pela interface.
+     *
+     * @param termo termo livre para busca textual
+     * @param status status do documento
+     * @param numeroProcesso numero do processo a localizar
+     * @param materia materia a localizar
+     * @param dataInicio data inicial do filtro
+     * @param dataFim data final do filtro
+     * @return lista de documentos que atendem aos filtros
+     */
     public List<Document> buscarDocumentos(String termo,
                                            String status,
                                            String numeroProcesso,
@@ -161,12 +194,22 @@ public class DocumentService {
         return List.of();
     }
 
+    /**
+     * Persiste o documento atual no indice Elasticsearch.
+     *
+     * @param documento documento que deve ser gravado ou atualizado
+     */
     private void salvarOuAtualizar(Document documento) {
         if (documentSearchService != null) {
             documentSearchService.salvarOuAtualizar(documento);
         }
     }
 
+    /**
+     * Remove um documento do indice Elasticsearch.
+     *
+     * @param id identificador do documento a remover
+     */
     private void removerDocumento(String id) {
         if (documentSearchService != null) {
             documentSearchService.remover(id);
@@ -174,7 +217,10 @@ public class DocumentService {
     }
 
     /**
-     * Extrai os metadados necessários para listagem/consulta geral da versão atual.
+     * Extrai os metadados utilizados nas telas de listagem e consulta.
+     *
+     * @param documento documento que recebera os metadados
+     * @param textoExtraido texto obtido da extração principal
      */
     private void preencherMetadados(Document documento, String textoExtraido) {
         if (textoExtraido == null || textoExtraido.isBlank()) {
@@ -186,7 +232,11 @@ public class DocumentService {
     }
 
     /**
-     * Retorna o primeiro grupo encontrado no regex informado.
+     * Retorna o primeiro grupo encontrado para o padrao informado.
+     *
+     * @param pattern expressao regular usada na busca
+     * @param texto texto de entrada a ser analisado
+     * @return primeiro grupo capturado ou null quando nao houver correspondencia
      */
     private String extrairPrimeiro(Pattern pattern, String texto) {
         Matcher matcher = pattern.matcher(texto);
@@ -197,7 +247,10 @@ public class DocumentService {
     }
 
     /**
-     * Tenta identificar a linha de matéria principal no cabeçalho da decisão.
+     * Tenta identificar a linha de materia principal no cabecalho do texto.
+     *
+     * @param texto texto extraido do documento
+     * @return linha que aparenta conter a materia ou null quando nao identificar
      */
     private String extrairMateria(String texto) {
         String[] linhas = texto.split("\\R");
@@ -220,7 +273,10 @@ public class DocumentService {
     }
 
     /**
-     * Normaliza espaços para evitar metadados com ruído de OCR.
+     * Normaliza espacos para reduzir ruido de OCR e padronizar os valores.
+     *
+     * @param valor valor original a ser limpo
+     * @return valor sem espacos repetidos ou null quando a entrada for nula
      */
     private String limparValor(String valor) {
         if (valor == null) {

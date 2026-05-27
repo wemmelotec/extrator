@@ -34,24 +34,38 @@ public class DocumentoController {
     private DocumentService documentService;
 
     /**
-     * Upload de novo documento com persistência e OCR
+     * Recebe um arquivo enviado pelo front, aciona o processamento de upload
+     * e devolve a representacao resumida do documento salvo.
+     *
+     * @param file arquivo PDF ou imagem enviado no multipart form-data
+     * @return resposta HTTP com o documento resumido ou mensagem de erro
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadDocumento(@RequestParam("file") MultipartFile file) {
         try {
+        	
             Document documento = documentService.processarUpload(file);
+            
             return ResponseEntity.status(HttpStatus.CREATED).body(toDto(documento));
+            
         } catch (IOException e) {
+        	
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao processar arquivo: " + e.getMessage());
+            
         } catch (IllegalArgumentException e) {
+        	
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Erro de validação: " + e.getMessage());
+            
         }
+        
     }
 
     /**
-     * Lista todos os documentos com paginação básica
+     * Lista os documentos disponiveis no indice para alimentar a tela de consulta.
+     *
+     * @return lista resumida de documentos retornada em HTTP 200
      */
     @GetMapping
     public ResponseEntity<List<DocumentoListaDTO>> listarDocumentos() {
@@ -59,7 +73,16 @@ public class DocumentoController {
     }
 
     /**
-     * Pesquisa documentos no Elasticsearch usando texto livre e filtros.
+     * Pesquisa documentos no Elasticsearch usando texto livre, status e filtros
+     * por processo, materia e intervalo de datas.
+     *
+     * @param termo termo livre para busca textual
+     * @param status status do documento a filtrar
+     * @param numeroProcesso numero do processo a filtrar
+     * @param materia materia do documento a filtrar
+     * @param dataInicio data inicial da janela de consulta no formato yyyy-MM-dd
+     * @param dataFim data final da janela de consulta no formato yyyy-MM-dd
+     * @return lista filtrada de documentos resumidos
      */
     @GetMapping("/busca")
     public ResponseEntity<List<DocumentoListaDTO>> buscarDocumentos(
@@ -81,7 +104,10 @@ public class DocumentoController {
     }
 
     /**
-     * Busca documento pelo ID
+     * Busca um documento pelo identificador unico.
+     *
+     * @param id identificador do documento no indice
+     * @return documento encontrado ou HTTP 404 caso nao exista
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarDocumento(@PathVariable String id) {
@@ -93,7 +119,10 @@ public class DocumentoController {
     }
 
     /**
-     * Faz download do PDF original associado ao documento.
+     * Faz o download do arquivo original associado ao documento.
+     *
+     * @param id identificador do documento
+     * @return recurso binario do arquivo ou HTTP 404 se nao existir
      */
     @GetMapping("/{id}/download")
     public ResponseEntity<Resource> baixarPdf(@PathVariable String id) {
@@ -121,7 +150,10 @@ public class DocumentoController {
     }
 
     /**
-     * Deleta um documento
+     * Remove um documento do indice e tenta apagar o arquivo fisico associado.
+     *
+     * @param id identificador do documento a excluir
+     * @return HTTP 204 quando a exclusao ocorre, ou HTTP 404 se nao encontrar
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarDocumento(@PathVariable String id) {
@@ -131,10 +163,22 @@ public class DocumentoController {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * Converte uma lista de entidades de documento em DTOs de listagem.
+     *
+     * @param documentos documentos carregados do indice
+     * @return lista de DTOs prontos para a camada web
+     */
     private List<DocumentoListaDTO> toDtoList(List<Document> documentos) {
         return documentos.stream().map(this::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * Transforma a entidade persistida em um DTO enxuto para a interface.
+     *
+     * @param doc documento completo obtido do Elasticsearch
+     * @return DTO resumido com os campos exibidos na tela
+     */
     private DocumentoListaDTO toDto(Document doc) {
         return new DocumentoListaDTO(
                 doc.getId(),
@@ -150,6 +194,12 @@ public class DocumentoController {
         );
     }
 
+    /**
+     * Converte a data inicial recebida da consulta para o inicio do dia.
+     *
+     * @param value data em formato yyyy-MM-dd
+     * @return data/hora normalizada para 00:00:00 ou null quando vazia
+     */
     private LocalDateTime parseDataInicio(String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -158,6 +208,12 @@ public class DocumentoController {
         return LocalDateTime.parse(value + "T00:00:00");
     }
 
+    /**
+     * Converte a data final recebida da consulta para o fim do dia.
+     *
+     * @param value data em formato yyyy-MM-dd
+     * @return data/hora normalizada para 23:59:59 ou null quando vazia
+     */
     private LocalDateTime parseDataFim(String value) {
         if (value == null || value.isBlank()) {
             return null;

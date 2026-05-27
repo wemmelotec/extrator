@@ -99,7 +99,15 @@ public class ExtratorDecisaoService {
     @Value("${ocr.image.scale-factor:2.0}")
     private double scaleFactor;
 
-    /** Objetivo: Extrair texto de arquivo local (caminho em filesystem). Usado no processamento diferido. */
+    /**
+     * Extrai texto de um arquivo local usando PDFBox ou Tesseract, conforme o
+     * tipo de arquivo e a qualidade do texto nativo.
+     *
+     * @param caminhoArquivo caminho absoluto do arquivo no filesystem
+     * @return resultado com texto pos-processado e origem da extração
+     * @throws IOException quando o arquivo nao pode ser lido
+     * @throws TesseractException quando o OCR falha na leitura da imagem
+     */
     public ResultadoExtracao extrairDeArquivoLocal(String caminhoArquivo) throws IOException, TesseractException {
         java.nio.file.Path path = java.nio.file.Paths.get(caminhoArquivo);
         byte[] conteudoArquivo = java.nio.file.Files.readAllBytes(path);
@@ -137,14 +145,25 @@ public class ExtratorDecisaoService {
         return new ResultadoExtracao(posProcessarTexto(textoBruto), origem);
     }
 
-    /** Objetivo: Ler texto vetorial do PDF sem OCR para preservar acentuacao e qualidade. */
+    /**
+     * Le o texto vetorial do PDF sem OCR para preservar acentuacao e estrutura.
+     *
+     * @param documento PDF carregado em memoria
+     * @return texto nativo extraido do PDF
+     * @throws IOException quando o PDF nao pode ser processado
+     */
     private String extrairTextoNativoDoPdf(PDDocument documento) throws IOException {
         PDFTextStripper stripper = new PDFTextStripper();
         stripper.setSortByPosition(true);
         return stripper.getText(documento);
     }
 
-    /** Objetivo: Validar se o texto nativo possui conteudo suficiente para ser confiavel. */
+    /**
+     * Valida se o texto nativo possui volume minimo para ser confiavel.
+     *
+     * @param texto texto nativo lido do PDF
+     * @return true quando o texto atinge o minimo esperado de qualidade
+     */
     private boolean textoNativoTemQualidadeMinima(String texto) {
         if (texto == null) {
             return false;
@@ -159,7 +178,15 @@ public class ExtratorDecisaoService {
         return letras >= textoNativoMinLetters;
     }
 
-    /** Objetivo: Renderizar PDF em imagens e executar OCR pagina a pagina. */
+    /**
+     * Renderiza cada pagina do PDF em imagem e executa OCR pagina a pagina.
+     *
+     * @param documento PDF aberto para processamento
+     * @param tesseract instancia configurada do OCR
+     * @return texto concatenado das paginas reconhecidas
+     * @throws IOException quando a renderizacao falha
+     * @throws TesseractException quando o OCR falha
+     */
     private String extrairTextoPdfViaOcr(PDDocument documento, ITesseract tesseract)
             throws IOException, TesseractException {
 
@@ -182,7 +209,11 @@ public class ExtratorDecisaoService {
         return texto.toString();
     }
 
-    /** Objetivo: Criar instancia do Tesseract com parametros de qualidade para documentos. */
+    /**
+     * Cria uma instancia do Tesseract configurada para documentos em portugues.
+     *
+     * @return instancia pronta para OCR
+     */
     private ITesseract criarTesseract() {
         Tesseract tesseract = new Tesseract();
         
@@ -199,7 +230,12 @@ public class ExtratorDecisaoService {
         return tesseract;
     }
 
-    /** Objetivo: Aplicar pipeline de pre-processamento para melhorar legibilidade no OCR. */
+    /**
+     * Aplica a pipeline de pre-processamento para melhorar a leitura do OCR.
+     *
+     * @param imagemOriginal imagem original carregada do PDF ou do arquivo
+     * @return imagem preparada para OCR
+     */
     private BufferedImage preProcessarImagemParaOcr(BufferedImage imagemOriginal) {
         Mat imagemMat = bufferedImageToMat(imagemOriginal);
         Mat imagemCinza = garantirEscalaCinza(imagemMat);
@@ -210,7 +246,12 @@ public class ExtratorDecisaoService {
         return matToBufferedImage(imagemEscalada);
     }
 
-    /** Objetivo: Garantir imagem monocromatica para operacoes de limiarizacao. */
+    /**
+     * Garante uma imagem em escala de cinza para as etapas de limiarizacao.
+     *
+     * @param imagemOriginal imagem de entrada no formato Mat
+     * @return matriz em tons de cinza
+     */
     private Mat garantirEscalaCinza(Mat imagemOriginal) {
         if (imagemOriginal.channels() == 1) {
             return imagemOriginal.clone();
@@ -221,14 +262,24 @@ public class ExtratorDecisaoService {
         return imagemCinza;
     }
 
-    /** Objetivo: Remover ruido fino preservando contornos de letras. */
+    /**
+     * Remove ruido fino preservando o contorno de letras e simbolos.
+     *
+     * @param imagemCinza imagem ja convertida para escala de cinza
+     * @return imagem com menos ruido visual
+     */
     private Mat reduzirRuido(Mat imagemCinza) {
         Mat imagemFiltrada = new Mat();
         opencv_imgproc.medianBlur(imagemCinza, imagemFiltrada, 3);
         return imagemFiltrada;
     }
 
-    /** Objetivo: Separar texto/fundo com threshold automatico Otsu. */
+    /**
+     * Separa texto e fundo usando threshold automatico de Otsu.
+     *
+     * @param imagemCinza imagem em escala de cinza
+     * @return imagem binarizada
+     */
     private Mat binarizarComOtsu(Mat imagemCinza) {
         Mat imagemBinarizada = new Mat();
         opencv_imgproc.threshold(
@@ -241,7 +292,12 @@ public class ExtratorDecisaoService {
         return imagemBinarizada;
     }
 
-    /** Objetivo: Fechar falhas pequenas em caracteres para reduzir letras quebradas. */
+    /**
+     * Fecha pequenas falhas nos caracteres para reduzir letras quebradas.
+     *
+     * @param imagemBinarizada imagem binarizada apos Otsu
+     * @return imagem com caracteres reforcados
+     */
     private Mat reforcarCaracteres(Mat imagemBinarizada) {
         Mat imagemReforcada = new Mat();
         Mat kernel = opencv_imgproc.getStructuringElement(
@@ -258,7 +314,12 @@ public class ExtratorDecisaoService {
         return imagemReforcada;
     }
 
-    /** Objetivo: Escalar a imagem para aumentar detalhes de acentos e caracteres pequenos. */
+    /**
+     * Amplia a imagem para aumentar detalhes de acentos e caracteres pequenos.
+     *
+     * @param imagemBinarizada imagem apos a etapa de reforco
+     * @return imagem redimensionada para OCR
+     */
     private Mat escalarParaOcr(Mat imagemBinarizada) {
         Mat imagemEscalada = new Mat();
         double fator = Math.max(1.0, scaleFactor);
@@ -273,13 +334,25 @@ public class ExtratorDecisaoService {
         return imagemEscalada;
     }
 
-    /** Objetivo: Executar OCR na imagem pre-processada e retornar texto bruto. */
+    /**
+     * Executa OCR na imagem pre-processada e retorna o texto bruto.
+     *
+     * @param imagemPreProcessada imagem preparada para OCR
+     * @param tesseract instancia configurada do motor OCR
+     * @return texto reconhecido pela engine
+     * @throws TesseractException quando a leitura falha
+     */
     private String executarOcr(BufferedImage imagemPreProcessada, ITesseract tesseract)
             throws TesseractException {
         return tesseract.doOCR(imagemPreProcessada);
     }
 
-    /** Objetivo: Limpar ruido de OCR e recompor estrutura textual do documento de decisao. */
+    /**
+     * Remove ruido de OCR e recompoe a estrutura textual do documento.
+     *
+     * @param textoBruto texto original extraido pela engine
+     * @return texto limpo e reorganizado para consulta
+     */
     private String posProcessarTexto(String textoBruto) {
         if (textoBruto == null || textoBruto.isBlank()) {
             return "";
@@ -299,7 +372,12 @@ public class ExtratorDecisaoService {
         return texto.trim();
     }
 
-    /** Objetivo: Corrigir colagens recorrentes observadas em decisoes OCRizadas. */
+    /**
+     * Corrige colagens recorrentes observadas em decisoes OCRizadas.
+     *
+     * @param texto texto de entrada
+     * @return texto com ajustes pontuais de palavras coladas
+     */
     private String corrigirPalavrasColadasComuns(String texto) {
         String ajustado = texto;
         ajustado = ajustado.replaceAll("(?iu)Estadomembro", "Estado-membro");
@@ -308,7 +386,12 @@ public class ExtratorDecisaoService {
         return ajustado;
     }
 
-    /** Objetivo: Unir linhas quebradas no meio da frase e preservar blocos semanticos. */
+    /**
+     * Une linhas quebradas no meio da frase e preserva blocos semanticos.
+     *
+     * @param texto texto pos-OCR com quebras de linha misturadas
+     * @return texto reorganizado em blocos mais legiveis
+     */
     private String juntarQuebrasInternasDeFrase(String texto) {
         String[] linhas = texto.split("\\n", -1);
         StringBuilder sb = new StringBuilder();
@@ -340,7 +423,12 @@ public class ExtratorDecisaoService {
         return sb.toString();
     }
 
-    /** Objetivo: Inserir quebra antes de rotulos relevantes para melhorar leitura final. */
+    /**
+     * Insere quebras antes de rotulos relevantes para facilitar a leitura.
+     *
+     * @param texto texto a ser ajustado
+     * @return texto com marcadores destacados em novas linhas
+     */
     private String reintroduzirQuebrasPorMarcadores(String texto) {
         String resultado = texto;
         for (String marcador : MARCADORES_DECISAO) {
@@ -349,7 +437,12 @@ public class ExtratorDecisaoService {
         return resultado;
     }
 
-    /** Objetivo: Detectar se uma linha inicia com marcador conhecido de documento de decisao. */
+    /**
+     * Detecta se uma linha inicia com um marcador conhecido do documento.
+     *
+     * @param linha linha textual a ser avaliada
+     * @return true quando a linha comeca com um marcador conhecido
+     */
     private boolean comecaComMarcador(String linha) {
         String normalizada = linha.toUpperCase(Locale.ROOT);
         for (String marcador : MARCADORES_DECISAO) {
@@ -360,7 +453,12 @@ public class ExtratorDecisaoService {
         return false;
     }
 
-    /** Objetivo: Converter Mat OpenCV para BufferedImage exigido pelo Tesseract. */
+    /**
+     * Converte Mat do OpenCV em BufferedImage para uso no Tesseract.
+     *
+     * @param imagemMat matriz OpenCV de entrada
+     * @return imagem convertida para BufferedImage
+     */
     private static BufferedImage matToBufferedImage(Mat imagemMat) {
         try (OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
              Java2DFrameConverter converterToBufferedImage = new Java2DFrameConverter()) {
@@ -368,7 +466,12 @@ public class ExtratorDecisaoService {
         }
     }
 
-    /** Objetivo: Converter BufferedImage para Mat OpenCV para aplicar filtros da pipeline. */
+    /**
+     * Converte BufferedImage em Mat do OpenCV para aplicar os filtros.
+     *
+     * @param bufferedImage imagem em memoria no formato BufferedImage
+     * @return matriz OpenCV correspondente
+     */
     private static Mat bufferedImageToMat(BufferedImage bufferedImage) {
         try (Java2DFrameConverter converterToFrame = new Java2DFrameConverter();
              OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat()) {

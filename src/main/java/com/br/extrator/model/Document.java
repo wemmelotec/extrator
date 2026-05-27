@@ -10,7 +10,8 @@ import org.springframework.data.elasticsearch.annotations.InnerField;
 import org.springframework.data.elasticsearch.annotations.MultiField;
 
 /**
- * Documento persistido no Elasticsearch com metadados pesquisáveis.
+ * Representa o documento persistido no Elasticsearch com os metadados
+ * utilizados para consulta, listagem e enriquecimento por OCR.
  */
 @org.springframework.data.elasticsearch.annotations.Document(indexName = "${app.elasticsearch.index-name}")
 public class Document {

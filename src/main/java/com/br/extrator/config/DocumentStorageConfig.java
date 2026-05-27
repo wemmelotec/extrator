@@ -25,7 +25,9 @@ public class DocumentStorageConfig {
     }
 
     /**
-     * Garante que o diretório base existe
+     * Garante que o diretorio base de armazenamento existe no filesystem.
+     *
+     * @return caminho absoluto e normalizado do diretorio de armazenamento
      */
     public Path ensureStorageDirectory() {
         Path storagePath = Paths.get(basePath).toAbsolutePath().normalize();
@@ -38,7 +40,10 @@ public class DocumentStorageConfig {
     }
 
     /**
-     * Gera um caminho único para arquivo baseado em UUID
+     * Gera um caminho unico para o arquivo a partir de um UUID e da extensao.
+     *
+     * @param nomeOriginal nome original do arquivo enviado pelo usuario
+     * @return caminho relativo onde o arquivo sera gravado
      */
     public String generateUniqueFilePath(String nomeOriginal) {
         String uuid = java.util.UUID.randomUUID().toString();

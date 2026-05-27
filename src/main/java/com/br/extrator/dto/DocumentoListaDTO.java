@@ -4,7 +4,8 @@ import com.br.extrator.model.StatusDocumento;
 import java.time.LocalDateTime;
 
 /**
- * DTO para retornar informações resumidas de um documento (evita enviar texto inteiro)
+ * DTO de listagem usado pelas telas web para exibir o resumo do documento sem
+ * trafegar o texto completo extraido.
  */
 public class DocumentoListaDTO {
     
@@ -19,8 +20,25 @@ public class DocumentoListaDTO {
     private String origemExtracao;
     private int tamanhoTexto;
 
+    /**
+     * Construtor padrao necessario para serializacao e desserializacao JSON.
+     */
     public DocumentoListaDTO() {}
 
+    /**
+     * Monta o DTO resumido a partir dos campos principais do documento.
+     *
+     * @param id identificador do documento
+     * @param nomeOriginal nome original do arquivo
+     * @param dataUpload data/hora do upload
+     * @param dataProcessamento data/hora do processamento final
+     * @param status status atual do documento
+     * @param numeroProcesso numero do processo identificado
+     * @param materia materia identificada
+     * @param textoNativo indica se a extração veio do texto nativo do PDF
+     * @param origemExtracao origem da extração textual
+     * @param textoExtraido texto completo usado apenas para calcular o tamanho
+     */
     public DocumentoListaDTO(String id, String nomeOriginal, LocalDateTime dataUpload,
                             LocalDateTime dataProcessamento, StatusDocumento status,
                             String numeroProcesso, String materia, boolean textoNativo,

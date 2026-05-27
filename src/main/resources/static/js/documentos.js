@@ -7,6 +7,12 @@
     var csrfToken = null;
     var csrfHeader = null;
 
+    /**
+     * Formata uma data recebida da API para exibicao no padrao local.
+     *
+     * @param value valor ISO recebido do backend
+     * @return data formatada ou o proprio valor quando nao for possivel converter
+     */
     function formatDate(value) {
         if (!value) {
             return "-";
@@ -20,6 +26,12 @@
         return date.toLocaleString("pt-BR");
     }
 
+    /**
+     * Cria o botao de exclusao para uma linha da tabela.
+     *
+     * @param id identificador do documento a excluir
+     * @return elemento button configurado com a acao de exclusao
+     */
     function createDeleteButton(id) {
         var deleteButton = document.createElement("button");
         deleteButton.type = "button";
@@ -34,6 +46,11 @@
         return deleteButton;
     }
 
+    /**
+     * Renderiza a lista de documentos na tabela da tela.
+     *
+     * @param documentos array de documentos retornado pelo backend
+     */
     function renderRows(documentos) {
         tabelaBody.innerHTML = "";
 
@@ -66,11 +83,22 @@
         });
     }
 
+    /**
+     * Atualiza a mensagem de status exibida acima da tabela.
+     *
+     * @param message texto a ser mostrado ao usuario
+     * @param isError indica se a mensagem representa erro
+     */
     function setStatus(message, isError) {
         uploadStatus.textContent = message;
         uploadStatus.style.color = isError ? "#972d2d" : "#0b3948";
     }
 
+    /**
+     * Monta o cabecalho CSRF quando o token esta disponivel na pagina.
+     *
+     * @return objeto com o header CSRF ou objeto vazio
+     */
     function getCsrfHeaders() {
         if (!csrfToken || !csrfHeader) {
             return {};
@@ -81,6 +109,9 @@
         return headers;
     }
 
+    /**
+     * Carrega a lista de documentos da API e atualiza a tabela.
+     */
     function loadDocumentos() {
         setStatus("", false);
         fetch("/api/documentos")
@@ -98,6 +129,11 @@
             });
     }
 
+    /**
+     * Exclui um documento e recarrega a listagem em caso de sucesso.
+     *
+     * @param id identificador do documento a excluir
+     */
     function deleteDocumento(id) {
         if (!id) {
             return;
@@ -124,6 +160,11 @@
             });
     }
 
+    /**
+     * Envia o arquivo selecionado para o endpoint de upload.
+     *
+     * @param event evento de submit do formulario
+     */
     function handleUpload(event) {
         event.preventDefault();
 
@@ -160,6 +201,9 @@
             });
     }
 
+    /**
+     * Inicializa referencias DOM e registra os listeners da tela de documentos.
+     */
     function bootstrap() {
         uploadForm = document.getElementById("uploadForm");
         arquivoInput = document.getElementById("arquivoPdf");

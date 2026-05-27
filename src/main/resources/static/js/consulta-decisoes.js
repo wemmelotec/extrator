@@ -6,6 +6,12 @@
     var limparBtn = null;
     var ultimaUrlConsulta = null;
 
+    /**
+     * Formata uma data ISO para o idioma pt-BR.
+     *
+     * @param value valor recebido do backend
+     * @return data formatada ou o valor original quando a conversao falhar
+     */
     function formatDate(value) {
         if (!value) {
             return "-";
@@ -19,11 +25,22 @@
         return date.toLocaleString("pt-BR");
     }
 
+    /**
+     * Atualiza o texto de status da tela de consulta.
+     *
+     * @param message mensagem a ser exibida
+     * @param isError indica se o status representa falha
+     */
     function setStatus(message, isError) {
         status.textContent = message || "";
         status.style.color = isError ? "#972d2d" : "#114b5f";
     }
 
+    /**
+     * Renderiza os resultados da consulta na tabela.
+     *
+     * @param documentos lista retornada pela API de busca
+     */
     function renderResultados(documentos) {
         resultadosBody.innerHTML = "";
 
@@ -62,6 +79,12 @@
         });
     }
 
+    /**
+     * Monta a URL de consulta a partir dos campos do formulario.
+     *
+     * @param formData dados atuais do formulario de busca
+     * @return URL relativa pronta para chamada fetch
+     */
     function buildQueryString(formData) {
         var params = new URLSearchParams();
 
@@ -76,6 +99,11 @@
         return query ? "/api/documentos/busca?" + query : "/api/documentos";
     }
 
+    /**
+     * Executa a chamada ao backend e atualiza a tabela de resultados.
+     *
+     * @param url URL da consulta a ser executada
+     */
     function executarConsulta(url) {
         ultimaUrlConsulta = url;
         setStatus("Consultando backend...", false);
@@ -99,6 +127,11 @@
             });
     }
 
+    /**
+     * Dispara uma nova consulta ao submeter o formulario.
+     *
+     * @param event evento submit do formulario
+     */
     function onSubmit(event) {
         event.preventDefault();
 
@@ -106,6 +139,9 @@
         executarConsulta(buildQueryString(formData));
     }
 
+    /**
+     * Reexecuta a ultima consulta realizada ou carrega a listagem padrao.
+     */
     function onRecarregar() {
         if (ultimaUrlConsulta) {
             executarConsulta(ultimaUrlConsulta);
@@ -115,6 +151,9 @@
         executarConsulta("/api/documentos");
     }
 
+    /**
+     * Limpa os filtros e volta a tela para o estado inicial.
+     */
     function onLimpar() {
         form.reset();
         ultimaUrlConsulta = null;
@@ -122,6 +161,9 @@
         setStatus("Filtros limpos.", false);
     }
 
+    /**
+     * Localiza os elementos da tela e registra os listeners da consulta.
+     */
     function bootstrap() {
         form = document.getElementById("consultaForm");
         status = document.getElementById("consultaStatus");
